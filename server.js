@@ -4,47 +4,49 @@ const http = require('http').createServer(app);
 const io = require('socket.io')(http);
 const PORT = process.env.PORT || 3000;
 
-// 儲存所有人上傳文字的「文字庫」
+// 預設公共隨機文字庫
 let textPool = [
-    "歡迎來到隨機聊天室！目前文字庫還空空的，快來上傳第一條文字吧！",
-    "今天也是充滿希望的一天，加油！ ✨",
+    "這是第一條預設的溫暖心聲 ✨",
+    "今天點了一杯奶茶，甜度剛剛好，希望你的心情也是！",
     "做人如果沒有夢想，那跟鹹魚有什麼分別？"
 ];
+
+// 讓專案可以使用當前目錄下的靜態資源檔案 (css, js, images 等)
+app.use(express.static(__dirname));
 
 app.get('/', (req, res) => {
     res.sendFile(__dirname + '/index.html');
 });
 
+// Socket 即時通訊核心監聽
 io.on('connection', (socket) => {
-    console.log('一個使用者連線了');
+    // 剛連線時，先將目前的字條數量同步給這名剛進來的使用者
+    socket.emit('pool updated', textPool.length);
 
-    // 監聽前端「上傳文字」的事件
+    // 監聽前端上傳文字
     socket.on('upload text', (msg) => {
-        if (msg.trim() !== "") {
-            textPool.push(msg); // 將文字存入後端陣列
-            console.log(`有人上傳了新文字！目前文字庫總數: ${textPool.length}`);
-            
-            // 告訴所有人文字庫更新了（選用，讓大家知道現在總共有幾條）
+        if (msg && msg.trim() !== "") {
+            textPool.push(msg.trim());
+            // 廣播給所有人更新後的總數量
             io.emit('pool updated', textPool.length);
         }
     });
 
-    // 監聽前端「請求隨機抽取」的事件
+    // 監聽前端隨機抽取請求
     socket.on('request random', () => {
         if (textPool.length === 0) {
-            socket.emit('random result', "目前文字庫裡面沒有任何文字喔！");
+            socket.emit('random result', "文字樹洞目前空空如也，快投入第一個秘密吧！");
             return;
         }
-
-        // 產生隨機索引值 (0 到 textPool.length - 1)
+        // 計算隨機索引值並取出文字
         const randomIndex = Math.floor(Math.random() * textPool.length);
         const selectedText = textPool[randomIndex];
-
-        // 將隨機抽到的文字，**單獨傳回給發出請求的那位用戶**
+        
+        // 將抽取結果單獨傳回給發出請求的該名用戶
         socket.emit('random result', selectedText);
     });
 });
 
 http.listen(PORT, () => {
-    console.log(`伺服器執行中：http://localhost:${PORT}`);
+    console.log(`伺服器正在運行中：http://localhost:${PORT}`);
 });
