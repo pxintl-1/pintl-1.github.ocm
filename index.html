@@ -3,37 +3,231 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>隨機抽選聊天樹洞</title>
+    <title>微信風 - 隨機文字樹洞</title>
     <style>
-        body { font-family: sans-serif; background: #f0f2f5; padding: 20px; display: flex; justify-content: center; }
-        .container { width: 100%; max-width: 500px; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        h2 { text-align: center; color: #333; }
-        .input-group { display: flex; margin-bottom: 15px; gap: 10px; }
-        input { flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 1rem; }
-        button { padding: 10px 15px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 1rem; }
-        .btn-upload { background: #28a745; color: white; }
-        .btn-upload:hover { background: #218838; }
-        .btn-random { background: #007bff; color: white; width: 100%; padding: 12px; margin-bottom: 20px; font-size: 1.1rem; }
-        .btn-random:hover { background: #0069d9; }
-        .status { text-align: center; color: #666; font-size: 0.9rem; margin-bottom: 15px; }
-        .result-box { background: #e9ecef; border-left: 5px solid #007bff; padding: 15px; border-radius: 4px; min-height: 50px; font-size: 1.1rem; word-break: break-all; }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: #ededed;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        /* 模擬手機外框 */
+        .phone-container {
+            width: 100%;
+            max-width: 450px;
+            height: 100vh;
+            background-color: #f3f3f3;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+
+        @media (min-width: 450px) {
+            .phone-container {
+                height: 800px;
+                border-radius: 12px;
+                overflow: hidden;
+            }
+        }
+
+        /* 微信綠頂端狀態列 */
+        .chat-header {
+            background-color: #ededed;
+            color: #181818;
+            padding: 15px;
+            text-align: center;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border-bottom: 1px solid #e0e0e0;
+            position: relative;
+        }
+
+        .chat-header .subtitle {
+            font-size: 0.75rem;
+            color: #888;
+            font-weight: normal;
+            margin-top: 2px;
+        }
+
+        /* 頂部功能功能區：隨機抽籤按鈕 */
+        .action-bar {
+            background-color: #fff;
+            padding: 10px;
+            text-align: center;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .btn-random {
+            background-color: #07c160; /* 微信綠 */
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 0.95rem;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(7,193,96,0.2);
+            transition: background 0.2s;
+        }
+
+        .btn-random:hover {
+            background-color: #06ae56;
+        }
+
+        /* 聊天訊息滾動區域 */
+        .chat-messages {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        /* 訊息泡泡基礎樣式 */
+        .message-wrapper {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            width: 100%;
+        }
+
+        /* 大頭貼模擬 */
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 4px;
+            background-color: #ccc;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.2rem;
+        }
+
+        .message {
+            max-width: 65%;
+            padding: 10px 14px;
+            border-radius: 4px;
+            font-size: 1rem;
+            line-height: 1.4;
+            position: relative;
+            word-break: break-all;
+        }
+
+        /* 接收到的訊息（左側：白色，代表抽到的文字） */
+        .message-wrapper.received {
+            justify-content: flex-start;
+        }
+        .message-wrapper.received .avatar {
+            background-color: #10aeff;
+            color: white;
+        }
+        .message-wrapper.received .message {
+            background-color: #ffffff;
+            color: #000000;
+            border: 1px solid #e0e0e0;
+        }
+        /* 左側泡泡小尖角 */
+        .message-wrapper.received .message::before {
+            content: "";
+            position: absolute;
+            top: 12px;
+            left: -10px;
+            border: 5px solid transparent;
+            border-right-color: #ffffff;
+        }
+
+        /* 自己發送的訊息（右側：微信綠，代表上傳投入的文字） */
+        .message-wrapper.sent {
+            justify-content: flex-end;
+            flex-direction: row-reverse;
+        }
+        .message-wrapper.sent .avatar {
+            background-color: #07c160;
+            color: white;
+        }
+        .message-wrapper.sent .message {
+            background-color: #95ec69; /* 微信發送綠 */
+            color: #000000;
+        }
+        /* 右側泡泡小尖角 */
+        .message-wrapper.sent .message::before {
+            content: "";
+            position: absolute;
+            top: 12px;
+            right: -10px;
+            border: 5px solid transparent;
+            border-left-color: #95ec69;
+        }
+
+        /* 底部微信風格輸入欄 */
+        .chat-input-area {
+            background-color: #f7f7f7;
+            padding: 10px;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .chat-input {
+            flex: 1;
+            height: 38px;
+            border: none;
+            background-color: #ffffff;
+            border-radius: 4px;
+            padding: 0 10px;
+            font-size: 1rem;
+            outline: none;
+        }
+
+        .btn-send {
+            background-color: #07c160;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            font-weight: bold;
+            cursor: pointer;
+            height: 38px;
+        }
+
+        .btn-send:hover {
+            background-color: #06ae56;
+        }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h2>🎲 隨機文字抽選樹洞</h2>
-    <div class="status" id="statusText">目前文字庫內已有許多靈魂文字...</div>
-
-    <div class="input-group">
-        <input id="textInput" placeholder="寫下你的心情、秘密或笑話..." autocomplete="off">
-        <button class="btn-upload" id="uploadBtn">上傳投入</button>
+<div class="phone-container">
+    <div class="chat-header">
+        <div>隨機漂流瓶樹洞</div>
+        <div class="subtitle" id="statusText">目前文字庫：載入中...</div>
     </div>
 
-    <button class="btn-random" id="randomBtn">🔮 隨機抽選一條文字</button>
+    <div class="action-bar">
+        <button class="btn-random" id="randomBtn">🔮 隨機撈取一個心聲</button>
+    </div>
 
-    <div class="result-box" id="resultBox">
-        點擊上方藍色按鈕，隨機抽取別人的留言吧！
+    <div class="chat-messages" id="chatMessages">
+        <div class="message-wrapper received">
+            <div class="avatar">🤖</div>
+            <div class="message">歡迎來到匿名樹洞。在下方輸入文字可以「投入漂流瓶」；點擊上方按鈕可以「撈取別人的心聲」喔！</div>
+        </div>
+    </div>
+
+    <div class="chat-input-area">
+        <input type="text" class="chat-input" id="textInput" placeholder="輸入你想投入的文字..." autocomplete="off">
+        <button class="btn-send" id="uploadBtn">傳送</button>
     </div>
 </div>
 
@@ -44,34 +238,63 @@
     const textInput = document.getElementById('textInput');
     const uploadBtn = document.getElementById('uploadBtn');
     const randomBtn = document.getElementById('randomBtn');
-    const resultBox = document.getElementById('resultBox');
+    const chatMessages = document.getElementById('chatMessages');
     const statusText = document.getElementById('statusText');
 
-    // 1. 點擊上傳按鈕
-    uploadBtn.addEventListener('click', () => {
+    // 輔助函式：自動滾動到最底
+    function scrollToBottom() {
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    // 1. 點擊傳送（上傳文字到後端，並在右側顯示自己寫的）
+    function handleUpload() {
         const text = textInput.value.trim();
-        if (text) {
-            socket.emit('upload text', text); // 發送給後端儲存
-            textInput.value = '';
-            alert('成功投入文字庫！');
-        }
+        if (text === '') return;
+
+        // 發送給後端儲存
+        socket.emit('upload text', text);
+
+        // 在前端右側生出「已發送」的綠色泡泡
+        const msgWrapper = document.createElement('div');
+        msgWrapper.classList.add('message-wrapper', 'sent');
+        msgWrapper.innerHTML = `
+            <div class="avatar">我</div>
+            <div class="message">${text}</div>
+        `;
+        chatMessages.appendChild(msgWrapper);
+        
+        textInput.value = '';
+        scrollToBottom();
+    }
+
+    uploadBtn.addEventListener('click', handleUpload);
+    textInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') handleUpload();
     });
 
-    // 2. 點擊隨機抽選按鈕
+    // 2. 點擊隨機抽選（向後端索取資料）
     randomBtn.addEventListener('click', () => {
-        socket.emit('request random'); // 向後端索取隨機資料
+        socket.emit('request random');
     });
 
-    // 3. 監聽後端回傳的隨機抽選結果
+    // 3. 監聽後端回傳的隨機抽選結果（在左側顯示白色泡泡）
     socket.on('random result', (msg) => {
-        resultBox.textContent = msg;
+        const msgWrapper = document.createElement('div');
+        msgWrapper.classList.add('message-wrapper', 'received');
+        msgWrapper.innerHTML = `
+            <div class="avatar">🔮</div>
+            <div class="message">${msg}</div>
+        `;
+        chatMessages.appendChild(msgWrapper);
+        scrollToBottom();
     });
 
-    // 4. 監聽文字庫數量更新（即時連線特效）
+    // 4. 更新頂部狀態列的文字庫數量
     socket.on('pool updated', (count) => {
-        statusText.textContent = `目前文字庫內累積了 ${count} 條文字！`;
+        statusText.textContent = `目前累積了 ${count} 個漂流瓶`;
     });
 </script>
 
 </body>
 </html>
+
