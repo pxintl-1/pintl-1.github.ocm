@@ -1,185 +1,134 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="zh-CN" data-theme="light" data-color-theme="black-white">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>微信風 - 隨機文字樹洞</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#000000">
+
+    <title>传讯</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600&family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/shop.css">
+    <link rel="icon" type=\"image/png\" sizes=\"192x192\" href=\"https://file.youtochat.com/images/\">
+
     <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-        }
-
-        body {
-            background-color: #ededed;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-        }
-
-        /* 模擬手機外框 */
-        .phone-container {
-            width: 100%;
-            max-width: 450px;
-            height: 100vh;
-            background-color: #f3f3f3;
+        .drift-bottle-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: #ededed;
+            z-index: 999999;
             display: flex;
             flex-direction: column;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         }
-
-        @media (min-width: 450px) {
-            .phone-container {
-                height: 800px;
-                border-radius: 12px;
-                overflow: hidden;
-            }
-        }
-
-        /* 微信綠頂端狀態列 */
-        .chat-header {
-            background-color: #ededed;
-            color: #181818;
-            padding: 15px;
-            text-align: center;
-            font-size: 1.1rem;
-            font-weight: bold;
+        .drift-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            background: #ededed;
             border-bottom: 1px solid #e0e0e0;
-            position: relative;
         }
-
-        .chat-header .subtitle {
-            font-size: 0.75rem;
-            color: #888;
-            font-weight: normal;
-            margin-top: 2px;
+        .drift-back-btn {
+            background: none;
+            border: none;
+            color: #181818;
+            font-size: 1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
         }
-
-        /* 頂部功能功能區：隨機抽籤按鈕 */
-        .action-bar {
+        .drift-action-bar {
             background-color: #fff;
             padding: 10px;
             text-align: center;
             border-bottom: 1px solid #e0e0e0;
         }
-
-        .btn-random {
-            background-color: #07c160; /* 微信綠 */
+        .drift-random-btn {
+            background-color: #07c160;
             color: white;
             border: none;
-            padding: 8px 20px;
+            padding: 8px 24px;
             border-radius: 20px;
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             font-weight: bold;
             cursor: pointer;
             box-shadow: 0 2px 5px rgba(7,193,96,0.2);
             transition: background 0.2s;
         }
-
-        .btn-random:hover {
+        .drift-random-btn:hover {
             background-color: #06ae56;
         }
-
-        /* 聊天訊息滾動區域 */
-        .chat-messages {
+        .drift-messages {
             flex: 1;
             padding: 15px;
             overflow-y: auto;
             display: flex;
             flex-direction: column;
             gap: 15px;
+            background: #f3f3f3;
         }
-
-        /* 訊息泡泡基礎樣式 */
-        .message-wrapper {
+        .drift-msg-wrapper {
             display: flex;
-            align-items: flex-start;
             gap: 10px;
             width: 100%;
         }
-
-        /* 大頭貼模擬 */
-        .avatar {
+        .drift-msg-wrapper.sent {
+            justify-content: flex-end;
+            flex-direction: row-reverse;
+        }
+        .drift-avatar {
             width: 40px;
             height: 40px;
             border-radius: 4px;
-            background-color: #ccc;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 1.2rem;
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: white;
         }
-
-        .message {
+        .drift-avatar.sys { background-color: #10aeff; }
+        .drift-avatar.user { background-color: #07c160; }
+        .drift-avatar.pool { background-color: #f59e0b; }
+        
+        .drift-text {
             max-width: 65%;
             padding: 10px 14px;
             border-radius: 4px;
             font-size: 1rem;
             line-height: 1.4;
-            position: relative;
             word-break: break-all;
+            position: relative;
         }
-
-        /* 接收到的訊息（左側：白色，代表抽到的文字） */
-        .message-wrapper.received {
-            justify-content: flex-start;
-        }
-        .message-wrapper.received .avatar {
-            background-color: #10aeff;
-            color: white;
-        }
-        .message-wrapper.received .message {
+        .drift-msg-wrapper.received .drift-text {
             background-color: #ffffff;
             color: #000000;
             border: 1px solid #e0e0e0;
         }
-        /* 左側泡泡小尖角 */
-        .message-wrapper.received .message::before {
-            content: "";
-            position: absolute;
-            top: 12px;
-            left: -10px;
-            border: 5px solid transparent;
-            border-right-color: #ffffff;
-        }
-
-        /* 自己發送的訊息（右側：微信綠，代表上傳投入的文字） */
-        .message-wrapper.sent {
-            justify-content: flex-end;
-            flex-direction: row-reverse;
-        }
-        .message-wrapper.sent .avatar {
-            background-color: #07c160;
-            color: white;
-        }
-        .message-wrapper.sent .message {
-            background-color: #95ec69; /* 微信發送綠 */
+        .drift-msg-wrapper.sent .drift-text {
+            background-color: #95ec69;
             color: #000000;
         }
-        /* 右側泡泡小尖角 */
-        .message-wrapper.sent .message::before {
-            content: "";
-            position: absolute;
-            top: 12px;
-            right: -10px;
-            border: 5px solid transparent;
-            border-left-color: #95ec69;
-        }
-
-        /* 底部微信風格輸入欄 */
-        .chat-input-area {
+        .drift-input-area {
             background-color: #f7f7f7;
             padding: 10px;
             border-top: 1px solid #e0e0e0;
             display: flex;
             align-items: center;
             gap: 10px;
+            padding-bottom: calc(10px + env(safe-area-inset-bottom));
         }
-
-        .chat-input {
+        .drift-input {
             flex: 1;
             height: 38px;
             border: none;
@@ -189,112 +138,171 @@
             font-size: 1rem;
             outline: none;
         }
-
-        .btn-send {
+        .drift-send-btn {
             background-color: #07c160;
             color: white;
             border: none;
-            padding: 8px 15px;
+            padding: 8px 16px;
             border-radius: 4px;
             font-weight: bold;
             cursor: pointer;
             height: 38px;
         }
-
-        .btn-send:hover {
-            background-color: #06ae56;
-        }
     </style>
 </head>
 <body>
 
-<div class="phone-container">
-    <div class="chat-header">
-        <div>隨機漂流瓶樹洞</div>
-        <div class="subtitle" id="statusText">目前文字庫：載入中...</div>
-    </div>
+<div class="phone-wrapper">
+    <div class="phone-screen">
+        
+        <div class="apps-grid" style="padding: 20px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px;">
+            
+            <div class="app-item" onclick="openDriftBottle()" style="display: flex; flex-direction: column; align-items: center; cursor: pointer;">
+                <div class="app-icon" style="width: 55px; height: 55px; background: #07c160; color: white; display: flex; justify-content: center; align-items: center; border-radius: 12px; box-shadow: 0 4px 10px rgba(7,193,96,0.3);">
+                    <i class="fas fa-wine-bottle" style="font-size: 24px;"></i>
+                </div>
+                <span class="app-name" style="font-size: 0.8rem; margin-top: 5px; color: var(--text-color, #333);">隨機樹洞</span>
+            </div>
 
-    <div class="action-bar">
-        <button class="btn-random" id="randomBtn">🔮 隨機撈取一個心聲</button>
-    </div>
-
-    <div class="chat-messages" id="chatMessages">
-        <div class="message-wrapper received">
-            <div class="avatar">🤖</div>
-            <div class="message">歡迎來到匿名樹洞。在下方輸入文字可以「投入漂流瓶」；點擊上方按鈕可以「撈取別人的心聲」喔！</div>
         </div>
-    </div>
 
-    <div class="chat-input-area">
-        <input type="text" class="chat-input" id="textInput" placeholder="輸入你想投入的文字..." autocomplete="off">
-        <button class="btn-send" id="uploadBtn">傳送</button>
     </div>
 </div>
 
-<script src="/socket.io/socket.io.js"></script>
-<script>
-    const socket = io();
+<div id="drift-bottle-container" class="drift-bottle-container" style="display: none;">
+    
+    <div class="drift-header">
+        <button class="drift-back-btn" onclick="closeDriftBottle()">
+            <i class="fas fa-chevron-left"></i> 返回
+        </button>
+        <div style="text-align: center;">
+            <div style="font-weight: 700; font-size: 1rem; color: #181818;">隨機心聲樹洞</div>
+            <div id="drift-status" style="font-size: 0.75rem; color: #888;">目前文字庫：連線中...</div>
+        </div>
+        <div style="width: 45px;"></div>
+    </div>
 
-    const textInput = document.getElementById('textInput');
-    const uploadBtn = document.getElementById('uploadBtn');
-    const randomBtn = document.getElementById('randomBtn');
-    const chatMessages = document.getElementById('chatMessages');
-    const statusText = document.getElementById('statusText');
+    <div class="drift-action-bar">
+        <button id="drift-random-btn" class="drift-random-btn">
+            🔮 隨機撈取一個心聲泡泡
+        </button>
+    </div>
 
-    // 輔助函式：自動滾動到最底
-    function scrollToBottom() {
-        chatMessages.scrollTop = chatMessages.scrollHeight;
-    }
+    <div id="drift-messages" class="drift-messages">
+        <div class="drift-msg-wrapper received">
+            <div class="drift-avatar sys">🤖</div>
+            <div class="drift-text">
+                歡迎來到匿名心聲樹洞。在下方輸入框輸入字句可「投入公共文字庫」，點擊上方按鈕可以「抽取隨機文字」生成對話泡泡。
+            </div>
+        </div>
+    </div>
 
-    // 1. 點擊傳送（上傳文字到後端，並在右側顯示自己寫的）
-    function handleUpload() {
-        const text = textInput.value.trim();
-        if (text === '') return;
+    <div class="drift-input-area">
+        <input type="text" id="drift-input" class="drift-input" placeholder="寫下心聲投入文字庫..." autocomplete="off">
+        <button id="drift-send-btn" class="drift-send-btn">傳送</button>
+    </div>
+</div>
 
-        // 發送給後端儲存
-        socket.emit('upload text', text);
 
-        // 在前端右側生出「已發送」的綠色泡泡
-        const msgWrapper = document.createElement('div');
-        msgWrapper.classList.add('message-wrapper', 'sent');
-        msgWrapper.innerHTML = `
-            <div class="avatar">我</div>
-            <div class="message">${text}</div>
-        `;
-        chatMessages.appendChild(msgWrapper);
-        
-        textInput.value = '';
-        scrollToBottom();
-    }
+<div id="dg-editor-modal" style="display:none;"></div>
 
-    uploadBtn.addEventListener('click', handleUpload);
-    textInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') handleUpload();
-    });
+    <script src="/socket.io/socket.io.js"></script>
 
-    // 2. 點擊隨機抽選（向後端索取資料）
-    randomBtn.addEventListener('click', () => {
-        socket.emit('request random');
-    });
+    <script src="js/config.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/backup-engine.js"></script>
+    <script src="js/state.js"></script>
+    <script src="js/core.js"></script>
+    <script src="js/home.js"></script>
 
-    // 3. 監聽後端回傳的隨機抽選結果（在左側顯示白色泡泡）
-    socket.on('random result', (msg) => {
-        const msgWrapper = document.createElement('div');
-        msgWrapper.classList.add('message-wrapper', 'received');
-        msgWrapper.innerHTML = `
-            <div class="avatar">🔮</div>
-            <div class="message">${msg}</div>
-        `;
-        chatMessages.appendChild(msgWrapper);
-        scrollToBottom();
-    });
+    <script src="js/features/mood.js"></script>
+    <script src="js/features/envelope.js"></script>
+    <script src="js/features/red-packet.js"></script>
+    <script src="js/features/reply-library.js"></script>
+    <script src="js/features/theme-editor.js"></script>
+    <script src="js/features/group-chat.js"></script>
+    <script src="js/features/call.js"></script>
+    <script src="js/features/diary.js"></script>
+    <script src="js/features/accounting.js"></script>
+    <script src="js/features/moyu.js"></script>
+    <script src="js/features/map.js"></script>
 
-    // 4. 更新頂部狀態列的文字庫數量
-    socket.on('pool updated', (count) => {
-        statusText.textContent = `目前累積了 ${count} 個漂流瓶`;
-    });
-</script>
+    <script src="js/games.js"></script> 
+    <script src="js/features.js"></script> 
+    <script src="js/data.js"></script>
 
+    <script>
+        // 開關隨機樹洞 App 的控制
+        function openDriftBottle() {
+            document.getElementById('drift-bottle-container').style.display = 'flex';
+        }
+        function closeDriftBottle() {
+            document.getElementById('drift-bottle-container').style.display = 'none';
+        }
+
+        // 獨立功能封裝
+        (function() {
+            // 初始化 socket 連線
+            const socket = io(); 
+
+            const driftInput = document.getElementById('drift-input');
+            const driftSendBtn = document.getElementById('drift-send-btn');
+            const driftRandomBtn = document.getElementById('drift-random-btn');
+            const driftMessages = document.getElementById('drift-messages');
+            const driftStatus = document.getElementById('drift-status');
+
+            function scrollMessagesToBottom() {
+                driftMessages.scrollTop = driftMessages.scrollHeight;
+            }
+
+            // 1. 上傳並生成右側微信綠色泡泡
+            function handleUpload() {
+                const text = driftInput.value.trim();
+                if (!text) return;
+
+                // 發送至 Node.js 後端
+                socket.emit('upload text', text);
+
+                // 前端立刻生成右邊的對話區
+                const wrapper = document.createElement('div');
+                wrapper.className = "drift-msg-wrapper sent";
+                wrapper.innerHTML = `
+                    <div class="drift-avatar user">我</div>
+                    <div class="drift-text">${text}</div>
+                `;
+                driftMessages.appendChild(wrapper);
+                driftInput.value = '';
+                scrollMessagesToBottom();
+            }
+
+            driftSendBtn.addEventListener('click', handleUpload);
+            driftInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') handleUpload();
+            });
+
+            // 2. 點擊抽選向後端索取
+            driftRandomBtn.addEventListener('click', () => {
+                socket.emit('request random');
+            });
+
+            // 3. 監聽後端回傳隨機抽選，生成左側白色泡泡
+            socket.on('random result', (msg) => {
+                const wrapper = document.createElement('div');
+                wrapper.className = "drift-msg-wrapper received";
+                wrapper.innerHTML = `
+                    <div class="drift-avatar pool">🔮</div>
+                    <div class="drift-text">${msg}</div>
+                `;
+                driftMessages.appendChild(wrapper);
+                scrollMessagesToBottom();
+            });
+
+            // 4. 即時同步目前的漂流瓶總數
+            socket.on('pool updated', (count) => {
+                driftStatus.textContent = `目前累積了 ${count} 個心聲字條`;
+            });
+        })();
+    </script>
 </body>
 </html>
 
